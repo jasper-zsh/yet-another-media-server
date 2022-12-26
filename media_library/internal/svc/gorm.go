@@ -3,8 +3,8 @@ package svc
 import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"yet-another-media-server/media/internal/config"
-	"yet-another-media-server/media/internal/model"
+	"yet-another-media-server/media_library/internal/config"
+	"yet-another-media-server/media_library/internal/model"
 )
 
 func InitGorm(conf config.GormConf) *gorm.DB {
@@ -23,7 +23,7 @@ func InitGorm(conf config.GormConf) *gorm.DB {
 		&model.File{},
 		&model.Library{},
 		&model.Media{},
-		&model.Metadata{}, &model.MetadataDefinition{}, &model.MetadataValue{},
+		&model.Metadata{},
 	)
 	if err != nil {
 		panic("failed to migrate")
