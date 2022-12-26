@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package scanner;
+option go_package="./scanner";
+
+message ScanLibraryRequest {
+  int32 library_id = 1;
+  string scanner = 2;
+  map<string, string> options = 3;
+}
+
+message ScanLibraryResponse {}
+
+service Scanner {
+  rpc ScanLibrary(ScanLibraryRequest) returns (ScanLibraryResponse);
+}

@@ -1,0 +1,101 @@
+type Library {
+	ID        int32  `json:"id"`
+	CreatedAt int64  `json:"created_at"`
+	UpdatedAt int64  `json:"updated_at"`
+	Name      string `json:"name"`
+	BasePath  string `json:"base_path"`
+}
+
+type Media {
+	ID        int32                  `json:"id"`
+	CreatedAt int64                  `json:"created_at"`
+	UpdatedAt int64                  `json:"updated_at"`
+	Metadatas map[string][]*Metadata `json:"metadatas"`
+	Files     []*File                `json:"files"`
+}
+
+type Metadata {
+	ID        int32                  `json:"id"`
+	CreatedAt int64                  `json:"created_at"`
+	UpdatedAt int64                  `json:"updated_at"`
+	Type      string                 `json:"type"`
+	Value     string                 `json:"value"`
+	Children  map[string][]*Metadata `json:"children"`
+}
+
+type File {
+	ID        int32              `json:"id"`
+	CreatedAt int64              `json:"created_at"`
+	UpdatedAt int64              `json:"updated_at"`
+	Type      string             `json:"type"`
+	FilePath  string             `json:"file_path"`
+	Ext       map[string]string  `json:"ext"`
+	Children  map[string][]*File `json:"children"`
+}
+
+type PaginationOptions {
+	Size int32 `form:"size,default=20"`
+	Page int32 `form:"page,default=1"`
+}
+
+type PaginationResponse {
+	Total int64         `json:"total"`
+	List  []interface{} `json:"list"`
+}
+
+type CreateLibraryRequest {
+	Name     string `json:"name"`
+	BasePath string `json:"base_path"`
+}
+
+type ScanLibraryRequest {
+	LibraryID int32             `path:"library_id"`
+	Options   map[string]string `json:"options"`
+}
+
+type ScanLibraryResponse {}
+
+type Filter {
+	Type     string `json:"type"`
+	Value    string `json:"value,optional"`
+	Operator string `json:"operator,default=eq"`
+}
+
+type PaginateMediaByMetadataRequest {
+	PaginationOptions
+	LibraryID int32    `path:"library_id"`
+	Filters   []Filter `json:"filters"`
+}
+
+type GetMediaRequest {
+	LibraryID int32 `path:"library_id"`
+	MediaID   int32 `path:"media_id"`
+}
+
+type PaginateMetadataRequest {
+	PaginationOptions
+	LibraryID int32  `path:"library_id"`
+	Type      string `path:"type"`
+}
+
+type DeleteMetadataRequest {
+	LibraryID  int32 `path:"library_id"`
+	MetadataID int32 `path:"metadata_id"`
+}
+
+type DeleteMetadataResponse {}
+
+service gateway-api {
+	@handler createLibrary
+	post /library (CreateLibraryRequest) returns (Library)
+	@handler scanLibrary
+	post /library/:library_id/scan(ScanLibraryRequest) returns (ScanLibraryResponse)
+	@handler paginateMediaByMetadata
+	post /library/:library_id/media/search(PaginateMediaByMetadataRequest) returns (PaginationResponse)
+	@handler getMedia
+	get /library/:library_id/media/:media_id(GetMediaRequest) returns (Media)
+	@handler paginateMetadata
+	get /library/:library_id/metadata/:type(PaginateMetadataRequest) returns (PaginationResponse)
+	@handler deleteMetadata
+	delete /library/:library_id/metadata/:metadata_id(DeleteMetadataRequest) returns (DeleteMetadataResponse)
+}

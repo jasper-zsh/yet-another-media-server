@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package media_library;
+option go_package="./media_library";
+
+message Library {
+  int32 id = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+  string name = 4;
+  string base_path = 5;
+}
+
+message Media {
+  int32 id = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+  int32 library_id = 4;
+  repeated Metadata metadatas = 5;
+  repeated File files = 6;
+}
+
+message Metadata {
+  int32 id = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+  string type = 4;
+  string value = 5;
+  repeated Metadata children = 6;
+  int32 parent_id = 7;
+}
+
+message File {
+  int32 id = 1;
+  int64 created_at = 2;
+  int64 updated_at = 3;
+  string type = 4;
+  string file_path = 5;
+  map<string, string> ext = 6;
+  repeated File children = 7;
+}
+
+message PaginationOptions {
+  int32 size = 1;
+  int32 page = 2;
+}
+
+message PaginationResult {
+  int64 total = 1;
+}
+
+message CreateLibraryRequest {
+  string name = 1;
+  string base_path = 2;
+}
+
+message GetLibraryRequest {
+  int32 library_id = 1;
+}
+
+message GetLibraryResponse {
+  optional Library library = 1;
+}
+
+message CreateMediaRequest {
+  int32 library_id = 1;
+}
+
+message Filter {
+  string type = 1;
+  string value = 2;
+  string operator = 3;
+}
+
+message PaginateMediaByMetadataRequest {
+  int32 library_id = 1;
+  repeated Filter filters = 2;
+  PaginationOptions pagination = 3;
+}
+
+message PaginateMediaByMetadataResponse {
+  PaginationResult pagination = 1;
+  repeated Media medias = 2;
+}
+
+message GetMediaRequest {
+  int32 media_id = 1;
+}
+
+message GetMediaByFilePathRequest {
+  int32 library_id = 1;
+  string file_path = 2;
+}
+
+message GetMediaByFilePathResponse {
+  optional Media media = 1;
+}
+
+message CreateMetadataRequest {
+  int32 library_id = 1;
+  int32 parent_id = 2;
+  string type = 3;
+  string value = 4;
+}
+
+message PaginateMetadataRequest {
+  PaginationOptions pagination = 1;
+  int32 library_id = 2;
+  string type = 3;
+}
+
+message PaginateMetadataResponse {
+  PaginationResult pagination = 1;
+  repeated Metadata metadatas = 2;
+}
+
+message GetMetadataByValueRequest {
+  int32 library_id = 1;
+  string type = 2;
+  string value = 3;
+}
+
+message GetMetadataByValueResponse {
+  optional Metadata metadata = 1;
+}
+
+message CreateFileRequest {
+  int32 library_id = 1;
+  int32 media_id = 2;
+  int32 parent_id = 3;
+  string type = 4;
+  string file_path = 5;
+}
+
+message CreateMediaMetadataRelationRequest {
+  int32 media_id = 1;
+  int32 metadata_id = 2;
+}
+
+message CreateMediaMetadataRelationResponse {}
+
+message DeleteMetadataRequest {
+  int32 metadata_id = 1;
+}
+
+message DeleteMetadataResponse {}
+
+service Media_library {
+  rpc CreateLibrary(CreateLibraryRequest) returns (Library);
+  rpc GetLibrary(GetLibraryRequest) returns (GetLibraryResponse);
+
+  rpc CreateMedia(CreateMediaRequest) returns (Media);
+  rpc PaginateMediaByMetadata(PaginateMediaByMetadataRequest) returns (PaginateMediaByMetadataResponse);
+  rpc GetMedia(GetMediaRequest) returns (Media);
+  rpc GetMediaByFilePath(GetMediaByFilePathRequest) returns (GetMediaByFilePathResponse);
+
+  rpc CreateMetadata(CreateMetadataRequest) returns (Metadata);
+  rpc PaginateMetadata(PaginateMetadataRequest) returns (PaginateMetadataResponse);
+  rpc GetMetadataByValue(GetMetadataByValueRequest) returns (GetMetadataByValueResponse);
+  rpc CreateMediaMetadataRelation(CreateMediaMetadataRelationRequest) returns (CreateMediaMetadataRelationResponse);
+  rpc DeleteMetadata(DeleteMetadataRequest) returns (DeleteMetadataResponse);
+
+  rpc CreateFile(CreateFileRequest) returns (File);
+}

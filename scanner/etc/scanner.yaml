@@ -1,0 +1,11 @@
+Name: scanner.rpc
+ListenOn: 0.0.0.0:9091
+Etcd:
+  Hosts:
+  - 127.0.0.1:2379
+  Key: scanner.rpc
+MediaLibraryRpc:
+  Etcd:
+    Hosts:
+    - 127.0.0.1:2379
+    Key: media_library.rpc
