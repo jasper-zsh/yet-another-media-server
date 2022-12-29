@@ -2,11 +2,13 @@ package local
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"os"
 	"path"
 	"path/filepath"
+	"yet-another-media-server/encoder/queue"
 	"yet-another-media-server/media_library/medialibraryclient"
 	"yet-another-media-server/scanner/internal/svc"
 )
@@ -135,7 +137,7 @@ func (s *LocalScanner) processDirectory(library *medialibraryclient.Library, roo
 	}
 	for _, videoFile := range videoFiles {
 		relPath, _ := filepath.Rel(library.BasePath, videoFile)
-		_, err := s.svcCtx.MediaLibraryRpc.CreateFile(s.ctx, &medialibraryclient.CreateFileRequest{
+		f, err := s.svcCtx.MediaLibraryRpc.CreateFile(s.ctx, &medialibraryclient.CreateFileRequest{
 			LibraryId: library.Id,
 			MediaId:   media.Id,
 			Type:      "video",
@@ -145,6 +147,39 @@ func (s *LocalScanner) processDirectory(library *medialibraryclient.Library, roo
 			return err
 		}
 		s.logger.Infof("Associated file %s with media %d", relPath, media.Id)
+		spritePath := fmt.Sprintf("%s.sprite.jpg", videoFile)
+		vttPath := fmt.Sprintf("%s.vtt", videoFile)
+		foundVtt := false
+		_, err = os.Stat(spritePath)
+		if err == nil {
+			_, err = os.Stat(vttPath)
+			if err == nil {
+				foundVtt = true
+				vttRelPath, _ := filepath.Rel(library.BasePath, vttPath)
+				_, err := s.svcCtx.MediaLibraryRpc.CreateFile(s.ctx, &medialibraryclient.CreateFileRequest{
+					LibraryId: library.Id,
+					MediaId:   media.Id,
+					ParentId:  f.Id,
+					Type:      "video_thumbnails",
+					FilePath:  vttRelPath,
+				})
+				if err != nil {
+					return err
+				}
+				s.logger.Infof("Associated video thumbnails file %s with media %d", vttRelPath, media.Id)
+			}
+		}
+		if !foundVtt {
+			msg := queue.NewVTTSpriteMessage(media, f)
+			b, err := json.Marshal(msg)
+			if err != nil {
+				return err
+			}
+			err = s.svcCtx.EncoderSender.Send("", "yams.encoder", b)
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	return nil

@@ -9,3 +9,8 @@ MediaLibraryRpc:
     Hosts:
     - 127.0.0.1:2379
     Key: media_library.rpc
+EncoderSender:
+  Username: guest
+  Password: guest
+  Host: 127.0.0.1
+  Port: 5672

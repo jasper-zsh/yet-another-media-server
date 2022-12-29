@@ -6,7 +6,6 @@ import (
 )
 
 type Config struct {
-	zrpc.RpcServerConf
 	MediaLibraryRpc zrpc.RpcClientConf
-	EncoderSender   rabbitmq.RabbitSenderConf
+	Listener        rabbitmq.RabbitListenerConf
 }
